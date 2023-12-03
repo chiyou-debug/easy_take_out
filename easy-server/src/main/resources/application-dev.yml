@@ -1,0 +1,20 @@
+easy:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: easy_take_out
+    username: root
+    password: 1234
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    password: 1234
+
+  alioss:
+    endpoint: oss-eu-west-1.aliyuncs.com
+    access-key-id: LTAI5tKC3BZxVNKkcjdsa9iR
+    access-key-secret: 5LoOrtbcgghfwX1bNyF5y1B6M6qLBZ
+    bucket-name: sky-take-out-maynooth

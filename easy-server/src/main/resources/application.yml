@@ -1,0 +1,48 @@
+spring:
+  profiles:
+    active: dev # Configure environment information.
+  main:
+    allow-circular-references: true # Configure automatic resolution of circular dependencies.
+  datasource: # Configure database connection information.
+    druid:
+      driver-class-name: ${easy.datasource.driver-class-name}
+      url: jdbc:mysql://${easy.datasource.host}:${easy.datasource.port}/${easy.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${easy.datasource.username}
+      password: ${easy.datasource.password}
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher # Set Spring MVC's path matching strategy to be consistent with Swagger's path matching strategy.
+  redis:
+    host: ${easy.redis.host}
+    port: ${easy.redis.port}
+    database: ${easy.redis.database}
+    password: ${easy.redis.password}
+
+# Mybatis configuration information.
+mybatis:
+  mapper-locations: classpath:mapper/*.xml  # Mapper configuration files.
+  type-aliases-package: com.easy.entity
+  configuration:
+    map-underscore-to-camel-case: true  # Enable mapping of underscores to camel case in column names.
+
+# Configure log levels.
+logging:
+  level:
+    com:
+      easy:
+        mapper: debug
+        service: info
+        controller: info
+
+# Configure JWT information.
+easy:
+  jwt:
+    admin-secret-key: easy-take-out # Set the secret key used for JWT signing.
+    admin-ttl: 7200000 # Set JWT expiration time.
+    admin-token-name: token # Set the name of the token in the request.
+
+  alioss:
+    endpoint: ${easy.alioss.endpoint}
+    access-key-id: ${easy.alioss.access-key-id}
+    access-key-secret: ${easy.alioss.access-key-secret}
+    bucket-name: ${easy.alioss.bucket-name}
