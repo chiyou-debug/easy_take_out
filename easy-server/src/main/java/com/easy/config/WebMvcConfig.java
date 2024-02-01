@@ -1,5 +1,6 @@
 package com.easy.config;
 
+import com.easy.interceptor.UserLoginTokenInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.easy.interceptor.AdminLoginTokenInterceptor;
 import com.easy.json.JacksonObjectMapper;
@@ -23,10 +24,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private AdminLoginTokenInterceptor adminLoginTokenInterceptor;
 
+    @Autowired
+    private UserLoginTokenInterceptor userLoginTokenInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // Add interceptor for admin paths, excluding the login path
         registry.addInterceptor(adminLoginTokenInterceptor).addPathPatterns("/admin/**").excludePathPatterns("/admin/employee/login");
+        // Add interceptor for user paths, excluding the login path and status path
+        registry.addInterceptor(userLoginTokenInterceptor).addPathPatterns("/user/**").excludePathPatterns("/user/user/login", "/user/shop/status");
     }
 
     /**

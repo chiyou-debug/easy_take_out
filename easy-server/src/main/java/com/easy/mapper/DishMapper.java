@@ -92,4 +92,12 @@ public interface DishMapper {
      * @return
      */
     List<Dish> selectDishByCondition(Long categoryId, String name);
+
+    /**
+     * Query dishes and their related data
+     *
+     * @param dish
+     * @return
+     */
+    List<DishVO> listDishWithFlavors(Dish dish);
 }

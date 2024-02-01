@@ -94,9 +94,9 @@ public class DishController {
      *
      * @return
      */
-    @PutMapping("/status/{status}/{id}")
+    @PostMapping("/status/{status}")
     @ApiOperation("Enable/Disable Dish for Sale")
-    public Result startOrStop(@PathVariable Integer status, @PathVariable Long id) {
+    public Result startOrStop(@PathVariable Integer status, Long id) {
         log.info("Enabling/Disabling a dish for sale. Status: {}, ID: {}", status, id);
         dishService.startOrStop(id, status);
         return Result.success();

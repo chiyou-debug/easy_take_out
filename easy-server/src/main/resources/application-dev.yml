@@ -18,3 +18,7 @@ easy:
     access-key-id: LTAI5tKC3BZxVNKkcjdsa9iR
     access-key-secret: 5LoOrtbcgghfwX1bNyF5y1B6M6qLBZ
     bucket-name: sky-take-out-maynooth
+
+  wechat:
+    appid: wx0a5df76428140929
+    secret: 70f552b0f022f4b7d534ca2d89eca63f

@@ -19,6 +19,8 @@ import com.easy.utils.BeanHelper;
 import com.easy.vo.DishItemVO;
 import com.easy.vo.SetmealVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -36,6 +38,7 @@ public class SetmealServiceImpl implements SetmealService {
     @Autowired
     private DishMapper dishMapper;
 
+    @CacheEvict(cacheNames = "setmeal:cache", key = "#setmealDTO.categoryId")
     @Override
     public void save(SetmealDTO setmealDTO) {
         //1. Save basic information of the setmeal
@@ -71,6 +74,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
 
+    @CacheEvict(cacheNames = "setmeal:cache", allEntries = true)
     @Transactional
     @Override
     public void delete(List<Long> ids) {
@@ -103,6 +107,7 @@ public class SetmealServiceImpl implements SetmealService {
         return setmealVO;
     }
 
+    @CacheEvict(cacheNames = "setmeal:cache", allEntries = true)
     @Transactional
     @Override
     public void update(SetmealDTO setmealDTO) {
@@ -125,6 +130,7 @@ public class SetmealServiceImpl implements SetmealService {
         }
     }
 
+    @CacheEvict(cacheNames = "setmeal:cache", allEntries = true)
     @Transactional
     @Override
     public void startOrStop(Integer status, Long id) {
@@ -146,5 +152,17 @@ public class SetmealServiceImpl implements SetmealService {
                 .status(status)
                 .build();
         setmealMapper.update(setmeal);
+    }
+
+
+    @Cacheable(cacheNames = "setmeal:cache", key = "#setmeal.categoryId")
+    @Override
+    public List<Setmeal> list(Setmeal setmeal) {
+        return setmealMapper.list(setmeal);
+    }
+
+    @Override
+    public List<DishItemVO> getDishItemById(Long id) {
+        return setmealMapper.getDishItemBySetmealId(id);
     }
 }

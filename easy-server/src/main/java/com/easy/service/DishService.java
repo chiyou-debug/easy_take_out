@@ -62,4 +62,12 @@ public interface DishService {
      * @return
      */
     List<Dish> list(Long categoryId, String name);
+
+    /**
+     * Conditional query for dishes with flavors
+     *
+     * @param categoryId
+     * @return
+     */
+    List<DishVO> listDishWithFlavors(Long categoryId);
 }

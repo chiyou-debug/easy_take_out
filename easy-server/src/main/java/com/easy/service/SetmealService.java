@@ -54,4 +54,18 @@ public interface SetmealService {
      * @param id
      */
     void startOrStop(Integer status, Long id);
+
+
+    /**
+     * Conditional query
+     *
+     * @param setmeal
+     * @return
+     */
+    List<Setmeal> list(Setmeal setmeal);
+
+    /**
+     * Query the dish information associated with a specific setmeal
+     */
+    List<DishItemVO> getDishItemById(Long id);
 }

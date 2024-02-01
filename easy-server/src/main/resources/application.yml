@@ -40,9 +40,16 @@ easy:
     admin-secret-key: easy-take-out # Set the secret key used for JWT signing.
     admin-ttl: 7200000 # Set JWT expiration time.
     admin-token-name: token # Set the name of the token in the request.
+    user-secret-key: easy-take-out-user
+    user-ttl: 7200000
+    user-token-name: authentication
 
   alioss:
     endpoint: ${easy.alioss.endpoint}
     access-key-id: ${easy.alioss.access-key-id}
     access-key-secret: ${easy.alioss.access-key-secret}
     bucket-name: ${easy.alioss.bucket-name}
+
+  wechat:
+    appid: ${easy.wechat.appid}
+    secret: ${easy.wechat.secret}

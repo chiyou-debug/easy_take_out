@@ -18,7 +18,9 @@ import com.easy.result.PageResult;
 import com.easy.service.DishService;
 import com.easy.utils.BeanHelper;
 import com.easy.vo.DishVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -27,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@Slf4j
 public class DishServiceImpl implements DishService {
 
     @Autowired
@@ -37,6 +40,8 @@ public class DishServiceImpl implements DishService {
     private SetmealDishMapper setmealDishMapper;
     @Autowired
     private SetmealMapper setmealMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Transactional
     @Override
@@ -55,6 +60,9 @@ public class DishServiceImpl implements DishService {
             });
             dishFlavorMapper.insertBatch(flavors);
         }
+
+        // 3. Delete the dish data in the redis cache
+        cleanCache(dishDTO.getCategoryId().toString());
     }
 
     @Override
@@ -88,6 +96,14 @@ public class DishServiceImpl implements DishService {
         //3. Delete the dish and its flavors
         dishMapper.deleteByIds(ids);
         dishFlavorMapper.deleteByDishIds(ids);
+
+        // 4、Delete the dish data in the redis cache
+        cleanCache("*");
+    }
+
+    private void cleanCache(String suffix) {
+        log.info("Clear the specified key{} in the cache", "dish:cache:" + suffix);
+        redisTemplate.delete(redisTemplate.keys("dish:cache:" + suffix));
     }
 
     @Override
@@ -125,6 +141,9 @@ public class DishServiceImpl implements DishService {
             });
             dishFlavorMapper.insertBatch(flavors);
         }
+
+        // 3、Delete the dish data in the redis cache
+        cleanCache("*");
     }
 
     @Transactional
@@ -147,10 +166,34 @@ public class DishServiceImpl implements DishService {
                 });
             }
         }
+
+        // 3、Delete the dish data in the redis cache
+        cleanCache("*");
     }
 
     @Override
     public List<Dish> list(Long categoryId, String name) {
         return dishMapper.selectDishByCondition(categoryId, name);
+    }
+
+    @Override
+    public List<DishVO> listDishWithFlavors(Long categoryId) {
+        String redisDishKey = "dish:cache:" + categoryId;
+
+        // 1. First, check the Redis cache. If there is data in the cache, return it directly.
+        List<DishVO> dishVOList = (List<DishVO>) redisTemplate.opsForValue().get(redisDishKey);
+        if (!CollectionUtils.isEmpty(dishVOList)) {
+            log.info("Query Redis cache, data found, returning directly...");
+            return dishVOList;
+        }
+
+        // 2. If there is no data in the cache, query the database.
+        Dish dish = Dish.builder().categoryId(categoryId).status(StatusConstant.ENABLE).build();
+        dishVOList = dishMapper.listDishWithFlavors(dish);
+
+        // 3. Add the database query result to the cache.
+        redisTemplate.opsForValue().set(redisDishKey, dishVOList);
+        log.info("Query the database, caching the retrieved data in Redis...");
+        return dishVOList;
     }
 }
