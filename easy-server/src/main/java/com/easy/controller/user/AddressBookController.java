@@ -6,16 +6,13 @@ import com.easy.result.Result;
 import com.easy.service.AddressBookService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/user/addressBook")
-@Api(tags = "Client-side address book interface")
+@Api(tags = "Client-side Address Book Interface")
 public class AddressBookController {
 
     @Autowired
@@ -112,5 +109,4 @@ public class AddressBookController {
 
         return Result.error("No default address found");
     }
-
 }

@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,8 +25,7 @@ public class AddressBookServiceImpl implements AddressBookService {
     @Override
     public void save(AddressBook addressBook) {
         addressBook.setUserId(BaseContext.getCurrentId());
-        addressBook.setIsDefault(0);
-        addressBook.setCreateTime(LocalDateTime.now());
+        addressBook.setIsDefault(0); // Set as non-default address
         addressBookMapper.insert(addressBook);
     }
 
@@ -46,12 +43,12 @@ public class AddressBookServiceImpl implements AddressBookService {
     @Override
     @Transactional
     public void setDefault(AddressBook addressBook) {
-        //1. Change all addresses of the current user to non-default addresses (update address_book set is_default = ? where user_id = ?)
+        // 1. Change all addresses of the current user to non-default addresses
         addressBook.setIsDefault(0);
         addressBook.setUserId(BaseContext.getCurrentId());
         addressBookMapper.updateIsDefaultByUserId(addressBook);
 
-        //2. Change the current address to the default address (update address_book set is_default = ? where id = ?)
+        // 2. Change the current address to the default address
         addressBook.setIsDefault(1);
         addressBookMapper.update(addressBook);
     }

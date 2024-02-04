@@ -61,5 +61,5 @@ public class AddressBook implements Serializable {
     private Integer isDefault;
 
     // Creation time
-    private LocalDateTime createTime;
+    //private LocalDateTime createTime;
 }

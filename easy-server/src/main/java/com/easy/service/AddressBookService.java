@@ -1,7 +1,6 @@
 package com.easy.service;
 
 import com.easy.entity.AddressBook;
-
 import java.util.List;
 
 public interface AddressBookService {
