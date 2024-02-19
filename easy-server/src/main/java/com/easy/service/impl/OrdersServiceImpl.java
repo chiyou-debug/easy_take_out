@@ -1,19 +1,17 @@
 package com.easy.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.easy.constant.MessageConstant;
 import com.easy.context.BaseContext;
+import com.easy.dto.OrdersPaymentDTO;
 import com.easy.dto.OrdersSubmitDTO;
-import com.easy.entity.AddressBook;
-import com.easy.entity.OrderDetail;
-import com.easy.entity.Orders;
-import com.easy.entity.ShoppingCart;
+import com.easy.entity.*;
 import com.easy.exception.BusinessException;
-import com.easy.mapper.AddressBookMapper;
-import com.easy.mapper.OrderDetailMapper;
-import com.easy.mapper.OrdersMapper;
-import com.easy.mapper.ShoppingCartMapper;
+import com.easy.mapper.*;
 import com.easy.service.OrdersService;
 import com.easy.utils.BeanHelper;
+import com.easy.utils.WeChatPayUtil;
+import com.easy.vo.OrderPaymentVO;
 import com.easy.vo.OrderSubmitVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +36,10 @@ public class OrdersServiceImpl implements OrdersService {
     private OrdersMapper ordersMapper;
     @Autowired
     private OrderDetailMapper orderDetailMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private WeChatPayUtil weChatPayUtil;
 
     @Transactional
     @Override
@@ -95,4 +98,53 @@ public class OrdersServiceImpl implements OrdersService {
         return orderSubmitVO;
     }
 
+    /**
+     * Order payment
+     *
+     * @param ordersPaymentDTO the DTO containing payment details
+     * @return the payment result represented by OrderPaymentVO
+     * @throws Exception if an error occurs during the payment process
+     */
+    public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
+        // Get the ID of the current logged-in user
+        Long userId = BaseContext.getCurrentId();
+        User user = userMapper.getById(userId);
+
+        // Call the WeChat payment API to generate a prepayment transaction order
+        JSONObject jsonObject = weChatPayUtil.pay(
+                ordersPaymentDTO.getOrderNumber(), // Merchant order number
+                new BigDecimal(0.01), // Payment amount in yuan
+                "SkyTakeout Order", // Product description
+                user.getOpenid() // WeChat user's openid
+        );
+
+        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
+            throw new BusinessException("This order has been paid");
+        }
+
+        OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
+        vo.setPackageStr(jsonObject.getString("package"));
+
+        return vo;
+    }
+
+    /**
+     * Pay success, modify order status.
+     *
+     * @param outTradeNo
+     */
+    public void paySuccess(String outTradeNo) {
+        // Query the current user's order based on the order number
+        Orders ordersDB = ordersMapper.getByNumber(outTradeNo);
+
+        // Update the order status, payment method, payment status, and checkout time based on the order ID
+        Orders orders = Orders.builder()
+                .id(ordersDB.getId())
+                .status(Orders.ORDER_STATUS_PENDING_ACCEPTANCE)
+                .payStatus(Orders.PAYMENT_STATUS_PAID)
+                .checkoutTime(LocalDateTime.now())
+                .build();
+
+        ordersMapper.update(orders);
+    }
 }

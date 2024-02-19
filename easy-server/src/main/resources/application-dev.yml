@@ -22,3 +22,11 @@ easy:
   wechat:
     appid: wx0a5df76428140929
     secret: 70f552b0f022f4b7d534ca2d89eca63f
+    #wechat Pay merchant information
+    mchid: 1561414331
+    mchSerialNo: 4B3B3DC35414AD50B1B755BAF8DE9CC7CF407606
+    apiV3Key: CZBK51236435wxpay435434323FFDuv3
+    weChatPayCertFilePath: E:\pay\wechatpay_166D96F876F45C7D07CE98952A96EC980368ACFC.pem
+    privateKeyFilePath: E:\pay\apiclient_key.pem
+    notifyUrl: http://685470f9.r21.cpolar.top/notify/paySuccess
+    refundNotifyUrl: http://685470f9.r21.cpolar.top/notify/refundSuccess
