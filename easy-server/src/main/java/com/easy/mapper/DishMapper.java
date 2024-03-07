@@ -1,6 +1,6 @@
 package com.easy.mapper;
 
-import com.easy.annotation.AutoFill;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.easy.dto.DishPageQueryDTO;
 import com.easy.entity.Dish;
 import com.easy.enumeration.OperationType;
@@ -13,66 +13,13 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 @Mapper
-public interface DishMapper {
-
-    /**
-     * Count the number of dishes by category ID
-     *
-     * @param categoryId
-     * @return
-     */
-    @Select("select count(*) from dish where category_id = #{categoryId}")
-    Long countByCategoryId(Long categoryId);
-
-    /**
-     * Save basic information of a dish
-     *
-     * @param dish
-     */
-    @AutoFill(OperationType.INSERT)
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    @Insert("insert into dish (name, category_id, price, image, description, status, create_time, update_time, create_user, update_user) VALUES " +
-            "(#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})")
-    void insert(Dish dish);
-
-    /**
-     * Conditional query for dishes
-     *
-     * @param pageQueryDTO
-     * @return
-     */
-    List<DishVO> list(DishPageQueryDTO pageQueryDTO);
-
-    /**
-     * Count the number of dishes on sale by their IDs
-     *
-     * @param ids
-     * @return
-     */
-    Long countEnableDishByIds(List<Long> ids);
-
-    /**
-     * Batch delete dish data
-     *
-     * @param ids
-     */
-    void deleteByIds(List<Long> ids);
-
-    /**
-     * Query by dish ID
-     *
-     * @param id
-     * @return
-     */
-    @Select("select * from dish where id = #{id}")
-    Dish getById(Long id);
+public interface DishMapper extends BaseMapper<Dish> {
 
     /**
      * Dynamically update dish information
      *
      * @param dish
      */
-    @AutoFill(OperationType.UPDATE)
     void update(Dish dish);
 
     /**
@@ -100,4 +47,12 @@ public interface DishMapper {
      * @return
      */
     List<DishVO> listDishWithFlavors(Dish dish);
+
+    /**
+     * dynamic page query from dish and category table
+     *
+     * @param dishPageQueryDTO
+     * @return
+     */
+    List<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO);
 }

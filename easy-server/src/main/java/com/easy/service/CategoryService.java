@@ -1,5 +1,6 @@
 package com.easy.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.easy.dto.CategoryDTO;
 import com.easy.dto.CategoryPageQueryDTO;
 import com.easy.entity.Category;
@@ -7,7 +8,7 @@ import com.easy.result.PageResult;
 
 import java.util.List;
 
-public interface CategoryService {
+public interface CategoryService extends IService<Category> {
 
     /**
      * Add a new category

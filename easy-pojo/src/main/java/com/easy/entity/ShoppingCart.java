@@ -1,5 +1,7 @@
 package com.easy.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -46,5 +48,7 @@ public class ShoppingCart implements Serializable {
     // Image
     private String image;
 
+    // Creation time
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

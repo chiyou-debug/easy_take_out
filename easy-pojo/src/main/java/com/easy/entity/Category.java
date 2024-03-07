@@ -1,5 +1,7 @@
 package com.easy.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,14 +33,18 @@ public class Category implements Serializable {
     private Integer status;
 
     // Creation time
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
-    // Update time
+    // Modification time
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
     // Creator
+    @TableField(fill = FieldFill.INSERT)
     private Long createUser;
 
-    // Updater
+    // Modifier
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 }

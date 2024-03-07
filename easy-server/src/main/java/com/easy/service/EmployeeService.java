@@ -1,12 +1,13 @@
 package com.easy.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.easy.dto.EmployeeDTO;
 import com.easy.dto.EmployeeLoginDTO;
 import com.easy.dto.EmployeePageQueryDTO;
 import com.easy.entity.Employee;
 import com.easy.result.PageResult;
 
-public interface EmployeeService {
+public interface EmployeeService extends IService<Employee> {
 
     /**
      * Employee Login

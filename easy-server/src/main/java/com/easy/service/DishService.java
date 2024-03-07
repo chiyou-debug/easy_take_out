@@ -1,5 +1,6 @@
 package com.easy.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.easy.dto.DishDTO;
 import com.easy.dto.DishPageQueryDTO;
 import com.easy.entity.Dish;
@@ -8,7 +9,7 @@ import com.easy.vo.DishVO;
 
 import java.util.List;
 
-public interface DishService {
+public interface DishService extends IService<Dish> {
 
     /**
      * Add a new dish
@@ -20,10 +21,10 @@ public interface DishService {
     /**
      * Paginated query for dishes
      *
-     * @param pageQueryDTO
+     * @param dishPageQueryDTO
      * @return
      */
-    PageResult page(DishPageQueryDTO pageQueryDTO);
+    PageResult page(DishPageQueryDTO dishPageQueryDTO);
 
     /**
      * Batch delete dishes

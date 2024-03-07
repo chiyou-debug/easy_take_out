@@ -24,7 +24,7 @@
     <!-- Custom properties -->
     <properties>
         <java.version>11</java.version>
-        <mybatis.spring.version>2.3.0</mybatis.spring.version>
+        <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <lombok.version>1.18.24</lombok.version>
         <fastjson.version>1.2.76</fastjson.version>
         <commons.lang.version>2.6</commons.lang.version>
@@ -42,11 +42,11 @@
     <!-- Dependency management for unified dependency versions -->
     <dependencyManagement>
         <dependencies>
-            <!-- Mybatis starter dependency -->
+            <!-- Mybatis-plus starter dependency -->
             <dependency>
-                <groupId>org.mybatis.spring.boot</groupId>
-                <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis.spring.version}</version>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
             </dependency>
 
             <!-- Lombok -->

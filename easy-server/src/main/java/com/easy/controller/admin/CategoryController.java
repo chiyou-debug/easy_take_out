@@ -55,7 +55,7 @@ public class CategoryController {
     }
 
     /**
-     * Delete a category
+     * Delete a category by its id
      *
      * @param id
      * @return
@@ -101,9 +101,9 @@ public class CategoryController {
      * @param id
      * @return
      */
-    @PostMapping("/status/{status}")
+    @PutMapping("/status/{status}/{id}")
     @ApiOperation("Enable or Disable Category")
-    public Result<String> startOrStop(@PathVariable Integer status, Long id) {
+    public Result<String> startOrStop(@PathVariable Integer status, @PathVariable Long id) {
         categoryService.startOrStop(status, id);
         return Result.success();
     }

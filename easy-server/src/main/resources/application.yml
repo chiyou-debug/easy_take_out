@@ -3,6 +3,7 @@ spring:
     active: dev # Configure environment information.
   main:
     allow-circular-references: true # Configure automatic resolution of circular dependencies.
+    banner-mode: off
   datasource: # Configure database connection information.
     druid:
       driver-class-name: ${easy.datasource.driver-class-name}
@@ -18,12 +19,18 @@ spring:
     database: ${easy.redis.database}
     password: ${easy.redis.password}
 
-# Mybatis configuration information.
-mybatis:
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true # Enable mapping of underscores to camel case in column names.
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: assign_id
+    banner: false
   mapper-locations: classpath:mapper/*.xml  # Mapper configuration files.
   type-aliases-package: com.easy.entity
-  configuration:
-    map-underscore-to-camel-case: true  # Enable mapping of underscores to camel case in column names.
+
+
 
 # Configure log levels.
 logging:

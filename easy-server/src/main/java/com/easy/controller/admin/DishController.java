@@ -44,9 +44,9 @@ public class DishController {
      */
     @ApiOperation("Paginated Conditional Query")
     @GetMapping("/page")
-    public Result<PageResult> page(DishPageQueryDTO pageQueryDTO) {
-        log.info("Paginated conditional query: {}", pageQueryDTO);
-        PageResult pageResult = dishService.page(pageQueryDTO);
+    public Result<PageResult> page(DishPageQueryDTO dishPageQueryDTO) {
+        log.info("Paginated conditional query: {}", dishPageQueryDTO);
+        PageResult pageResult = dishService.page(dishPageQueryDTO);
         return Result.success(pageResult);
     }
 
@@ -94,9 +94,9 @@ public class DishController {
      *
      * @return
      */
-    @PostMapping("/status/{status}")
+    @PutMapping("/status/{status}/{id}")
     @ApiOperation("Enable/Disable Dish for Sale")
-    public Result startOrStop(@PathVariable Integer status, Long id) {
+    public Result startOrStop(@PathVariable Integer status, @PathVariable Long id) {
         log.info("Enabling/Disabling a dish for sale. Status: {}, ID: {}", status, id);
         dishService.startOrStop(id, status);
         return Result.success();

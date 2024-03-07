@@ -3,14 +3,6 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.easy.mapper.SetmealDishMapper">
 
-    <!-- Query setmeal IDs associated with dish IDs -->
-    <select id="getSetmealIdsByDishIds" resultType="java.lang.Long">
-        select setmeal_id from setmeal_dish where dish_id in
-        <foreach collection="ids" item="id" separator="," open="(" close=")">
-            #{id}
-        </foreach>
-    </select>
-
     <!-- Batch insert association information of setmeal and dishes -->
     <insert id="insertBatch">
         insert into setmeal_dish(setmeal_id, dish_id, name, price, copies) VALUES
@@ -27,5 +19,13 @@
             #{setmealId}
         </foreach>
     </delete>
+
+    <!-- Query setmeal IDs associated with dish IDs -->
+    <select id="getSetmealIdsByDishIds" resultType="java.lang.Long">
+        select setmeal_id from setmeal_dish where dish_id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
 
 </mapper>

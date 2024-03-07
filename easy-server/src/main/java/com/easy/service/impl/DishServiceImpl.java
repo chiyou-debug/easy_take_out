@@ -1,7 +1,7 @@
 package com.easy.service.impl;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.easy.constant.MessageConstant;
 import com.easy.constant.StatusConstant;
 import com.easy.dto.DishDTO;
@@ -9,6 +9,7 @@ import com.easy.dto.DishPageQueryDTO;
 import com.easy.entity.Dish;
 import com.easy.entity.DishFlavor;
 import com.easy.entity.Setmeal;
+import com.easy.entity.SetmealDish;
 import com.easy.exception.BusinessException;
 import com.easy.mapper.DishFlavorMapper;
 import com.easy.mapper.DishMapper;
@@ -18,6 +19,8 @@ import com.easy.result.PageResult;
 import com.easy.service.DishService;
 import com.easy.utils.BeanHelper;
 import com.easy.vo.DishVO;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -30,7 +33,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class DishServiceImpl implements DishService {
+public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements DishService {
 
     @Autowired
     private DishMapper dishMapper;
@@ -66,15 +69,15 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public PageResult page(DishPageQueryDTO pageQueryDTO) {
+    public PageResult page(DishPageQueryDTO dishPageQueryDTO) {
         //1. Set pagination parameters
-        PageHelper.startPage(pageQueryDTO.getPage(), pageQueryDTO.getPageSize());
+        PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
 
         //2. Execute query
-        List<DishVO> dishVOList = dishMapper.list(pageQueryDTO);
+        List<DishVO> dishVoList = dishMapper.pageQuery(dishPageQueryDTO);
+        Page page = (Page) dishVoList;
 
         //3. Parse and package pagination results
-        Page<DishVO> page = (Page<DishVO>) dishVOList;
         return new PageResult(page.getTotal(), page.getResult());
     }
 
@@ -82,20 +85,20 @@ public class DishServiceImpl implements DishService {
     @Override
     public void delete(List<Long> ids) {
         //1. Check dish status, dishes on sale cannot be deleted
-        Long count = dishMapper.countEnableDishByIds(ids);
-        if (count > 0) { //There are dishes on sale in this batch
+        if (dishMapper.selectCount(new LambdaQueryWrapper<Dish>().in(Dish::getId, ids).eq(Dish::getStatus, 1)) > 0) {
+            //There are dishes on sale in this batch
             throw new BusinessException(MessageConstant.DISH_ON_SALE);
         }
 
         //2. Check if the dish is associated with a setmeal, if so, cannot delete
-        List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(ids);
-        if (!CollectionUtils.isEmpty(setmealIds)) {//Associated with setmeal
+        if (setmealDishMapper.selectCount(new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getDishId, ids)) > 0) {
+            //Associated with setmeal
             throw new BusinessException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
 
         //3. Delete the dish and its flavors
-        dishMapper.deleteByIds(ids);
-        dishFlavorMapper.deleteByDishIds(ids);
+        dishMapper.deleteBatchIds(ids);
+        dishFlavorMapper.deleteBatchIds(ids);
 
         // 4、Delete the dish data in the redis cache
         cleanCache("*");
@@ -109,10 +112,10 @@ public class DishServiceImpl implements DishService {
     @Override
     public DishVO getInfo(Long id) {
         //1. Query basic information of the dish by ID
-        Dish dish = dishMapper.getById(id);
+        Dish dish = dishMapper.selectById(id);
 
         //2. Query the list of dish flavors by dish ID
-        List<DishFlavor> flavorList = dishFlavorMapper.getByDishId(id);
+        List<DishFlavor> flavorList = dishFlavorMapper.selectList(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, id));
 
         //3. Assemble data
         DishVO dishVO = BeanHelper.copyProperties(dish, DishVO.class);
@@ -131,7 +134,7 @@ public class DishServiceImpl implements DishService {
 
         //2. Modify dish flavor information (delete first, then add)
         //2.1 Delete existing flavor data based on dish ID
-        dishFlavorMapper.deleteByDishIds(Collections.singletonList(dish.getId()));
+        dishFlavorMapper.deleteBatchIds(Collections.singletonList(dish.getId()));
 
         //2.2 Then add new flavor data
         List<DishFlavor> flavors = dishDTO.getFlavors();

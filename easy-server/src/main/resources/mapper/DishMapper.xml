@@ -35,39 +35,6 @@
         where id = #{id}
     </update>
 
-    <!-- Batch delete dish data -->
-    <delete id="deleteByIds">
-        delete from dish where id in
-        <foreach collection="ids" item="id" separator="," open="(" close=")">
-            #{id}
-        </foreach>
-    </delete>
-
-    <!-- Conditional query -->
-    <select id="list" resultType="com.easy.vo.DishVO">
-        select d.*, c.name categoryName from dish d left join category c on d.category_id = c.id
-        <where>
-            <if test="name != null and name !=''">
-                d.name like concat('%', #{name}, '%')
-            </if>
-            <if test="categoryId != null">
-                and d.category_id = #{categoryId}
-            </if>
-            <if test="status != null">
-                and c.status = #{status}
-            </if>
-        </where>
-        order by d.create_time desc
-    </select>
-
-    <!-- Count the number of available dishes by ID -->
-    <select id="countEnableDishByIds" resultType="java.lang.Long">
-        select count(*) from dish where id in
-        <foreach collection="ids" item="id" separator="," open="(" close=")">
-            #{id}
-        </foreach>
-        and status = 1
-    </select>
 
     <!-- Query dishes by category and dish name -->
     <select id="selectDishByCondition" resultType="com.easy.entity.Dish">
@@ -115,5 +82,22 @@
                 AND d.status = #{status}
             </if>
         </where>
+    </select>
+
+
+    <select id="pageQuery" resultType="com.easy.vo.DishVO">
+        select d.* , c.name as categoryName from dish d left join category c on d.category_id = c.id
+        <where>
+            <if test="name != null and name != ''">
+                d.name like concat('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                and d.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and d.status = #{status}
+            </if>
+        </where>
+        order by d.create_time desc
     </select>
 </mapper>

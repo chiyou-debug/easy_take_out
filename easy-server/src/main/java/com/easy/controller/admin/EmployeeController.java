@@ -51,7 +51,12 @@ public class EmployeeController {
         String jwt = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
 
         // Package result and return
-        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder().id(employee.getId()).name(employee.getName()).userName(employee.getUsername()).token(jwt).build();
+        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
+                .id(employee.getId())
+                .name(employee.getName())
+                .userName(employee.getUsername())
+                .token(jwt)
+                .build();
         return Result.success(employeeLoginVO);
     }
 

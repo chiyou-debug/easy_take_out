@@ -45,7 +45,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             //3. If the product does not exist in the shopping cart, add a new record.
             Long dishId = shoppingCart.getDishId();
             if (dishId != null) { // For dishes
-                Dish dish = dishMapper.getById(dishId);
+                Dish dish = dishMapper.selectById(dishId);
                 shoppingCart.setAmount(dish.getPrice());
                 shoppingCart.setImage(dish.getImage());
                 shoppingCart.setName(dish.getName());

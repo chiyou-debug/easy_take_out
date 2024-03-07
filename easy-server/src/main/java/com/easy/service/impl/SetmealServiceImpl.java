@@ -1,5 +1,6 @@
 package com.easy.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.easy.constant.MessageConstant;
@@ -29,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class SetmealServiceImpl implements SetmealService {
+public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> implements SetmealService {
 
     @Autowired
     private SetmealMapper setmealMapper;

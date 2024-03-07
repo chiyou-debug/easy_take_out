@@ -1,5 +1,6 @@
 package com.easy.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.easy.dto.SetmealDTO;
 import com.easy.dto.SetmealPageQueryDTO;
 import com.easy.entity.Setmeal;
@@ -9,7 +10,7 @@ import com.easy.vo.SetmealVO;
 
 import java.util.List;
 
-public interface SetmealService {
+public interface SetmealService extends IService<Setmeal> {
     /**
      * Add a new setmeal
      *

@@ -1,5 +1,7 @@
 package com.easy.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -61,5 +63,6 @@ public class AddressBook implements Serializable {
     private Integer isDefault;
 
     // Creation time
-    //private LocalDateTime createTime;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 }

@@ -1,5 +1,7 @@
 package com.easy.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +39,7 @@ public class User implements Serializable {
     // Avatar
     private String avatar;
 
-    // Registration time
+    // Creation time
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

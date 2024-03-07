@@ -1,7 +1,10 @@
 package com.easy.service.impl;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.easy.constant.MessageConstant;
 import com.easy.constant.PasswordConstant;
 import com.easy.constant.StatusConstant;
@@ -19,6 +22,7 @@ import com.easy.utils.BeanHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 
     private static final String LOGIN_PASSWORD_ERROR_KEY = "login:error:"; // Key for marking password errors
     private static final String LOGIN_LOCK_ERROR_KEY = "login:lock:"; // Key for marking account lock
@@ -55,7 +59,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         validateAccountLock(username);
 
         // 1. Call Mapper to query employee information
-        Employee employee = employeeMapper.findByUsername(employeeLoginDTO.getUsername());
+        Employee employee = employeeMapper.selectOne(new LambdaQueryWrapper<Employee>()
+                .eq(Employee::getUsername, employeeLoginDTO.getUsername()));
 
         // 2. Check if the employee exists, if not, return error message
         if (employee == null) {
@@ -112,39 +117,42 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
         employee.setStatus(StatusConstant.ENABLE);
 
-        // 2. Call mapper to save data
+        // 2. Call mapper to save employee data
         employeeMapper.insert(employee);
     }
 
     @Override
     public PageResult page(EmployeePageQueryDTO pageQueryDTO) {
         // 1. Set pagination parameters
-        PageHelper.startPage(pageQueryDTO.getPage(), pageQueryDTO.getPageSize());
+        IPage<Employee> page = new Page<Employee>(pageQueryDTO.getPage(), pageQueryDTO.getPageSize());
 
         // 2. Perform query
-        List<Employee> employeeList = employeeMapper.list(pageQueryDTO.getName());
+        employeeMapper.selectPage(page, new LambdaQueryWrapper<Employee>()
+                .like(StringUtils.isNotBlank(pageQueryDTO.getName()), Employee::getName, pageQueryDTO.getName())
+        );
 
         // 3. Parse and package the result
-        Page<Employee> page = (Page<Employee>) employeeList;
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult(page.getTotal(), page.getRecords());
     }
 
     @Override
     public void enableOrDisable(Integer status, Long id) {
-        Employee employee = Employee.builder().id(id).status(status)
+        Employee employee = Employee.builder()
+                .id(id)
+                .status(status)
                 .build();
-        employeeMapper.update(employee);
+        employeeMapper.updateById(employee);
     }
 
     @Override
     public Employee getById(Long id) {
-        return employeeMapper.getById(id);
+        return employeeMapper.selectById(id);
     }
 
     @Override
     public void update(EmployeeDTO employeeDTO) {
         // Entity attribute copying
         Employee employee = BeanHelper.copyProperties(employeeDTO, Employee.class);
-        employeeMapper.update(employee);
+        employeeMapper.updateById(employee);
     }
 }
