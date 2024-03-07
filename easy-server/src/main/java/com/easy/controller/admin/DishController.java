@@ -29,11 +29,11 @@ public class DishController {
      *
      * @return
      */
-    @ApiOperation("Add a New Dish")
+    @ApiOperation("Add a New Dish and its flavors")
     @PostMapping
     public Result save(@RequestBody DishDTO dishDTO) {
         log.info("Adding a new dish: {}", dishDTO);
-        dishService.save(dishDTO);
+        dishService.saveWithFlavors(dishDTO);
         return Result.success();
     }
 
@@ -109,9 +109,9 @@ public class DishController {
      */
     @GetMapping("/list")
     @ApiOperation("Retrieve Dish Data by Category ID")
-    public Result<List<Dish>> list(Long categoryId, String name) {
+    public Result<List<Dish>> list(Long categoryId) {
         log.info("Retrieving dish data for category ID: {}", categoryId);
-        List<Dish> dishList = dishService.list(categoryId, name);
+        List<Dish> dishList = dishService.list(categoryId);
         return Result.success(dishList);
     }
 }

@@ -1,8 +1,9 @@
 package com.easy.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.easy.constant.MessageConstant;
 import com.easy.constant.StatusConstant;
 import com.easy.dto.SetmealDTO;
@@ -19,6 +20,7 @@ import com.easy.service.SetmealService;
 import com.easy.utils.BeanHelper;
 import com.easy.vo.DishItemVO;
 import com.easy.vo.SetmealVO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -64,14 +66,16 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     @Override
     public PageResult page(SetmealPageQueryDTO setmealPageQueryDTO) {
         //1. Set pagination parameters
-        PageHelper.startPage(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
+        IPage page = new Page(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
 
         //2. Execute the query
-        List<SetmealVO> setmealVOList = setmealMapper.listVo(setmealPageQueryDTO);
+        setmealMapper.selectPage(page, new LambdaQueryWrapper<Setmeal>()
+                .like(StringUtils.isNotBlank(setmealPageQueryDTO.getName()), Setmeal::getName, setmealPageQueryDTO.getName())
+                .eq(setmealPageQueryDTO.getCategoryId() != null, Setmeal::getCategoryId, setmealPageQueryDTO.getCategoryId())
+                .eq(setmealPageQueryDTO.getStatus() != null, Setmeal::getStatus, setmealPageQueryDTO.getStatus()));
 
         //3. Parse and encapsulate the results
-        Page page = (Page) setmealVOList;
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult(page.getTotal(), page.getRecords());
     }
 
 

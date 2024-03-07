@@ -33,11 +33,4 @@ public interface SetmealDishMapper extends BaseMapper<SetmealDish> {
     @Select("select * from setmeal_dish where setmeal_id = #{setmealId}")
     List<SetmealDish> getBySetmealId(Long setmealId);
 
-    /**
-     * Query setmeal IDs associated with given dish IDs
-     *
-     * @param longs
-     * @return
-     */
-    List<Long> getSetmealIdsByDishIds(List<Long> longs);
 }

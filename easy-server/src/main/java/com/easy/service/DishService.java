@@ -16,7 +16,7 @@ public interface DishService extends IService<Dish> {
      *
      * @param dishDTO
      */
-    void save(DishDTO dishDTO);
+    void saveWithFlavors(DishDTO dishDTO);
 
     /**
      * Paginated query for dishes
@@ -62,7 +62,7 @@ public interface DishService extends IService<Dish> {
      * @param categoryId
      * @return
      */
-    List<Dish> list(Long categoryId, String name);
+    List<Dish> list(Long categoryId);
 
     /**
      * Conditional query for dishes with flavors

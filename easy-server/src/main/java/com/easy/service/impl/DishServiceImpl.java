@@ -16,12 +16,14 @@ import com.easy.mapper.DishMapper;
 import com.easy.mapper.SetmealDishMapper;
 import com.easy.mapper.SetmealMapper;
 import com.easy.result.PageResult;
+import com.easy.service.DishFlavorService;
 import com.easy.service.DishService;
 import com.easy.utils.BeanHelper;
 import com.easy.vo.DishVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -45,24 +48,25 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     private SetmealMapper setmealMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private DishFlavorService dishFlavorService;
 
     @Transactional
     @Override
-    public void save(DishDTO dishDTO) {
+    public void saveWithFlavors(DishDTO dishDTO) {
         Dish dish = BeanHelper.copyProperties(dishDTO, Dish.class);
 
         //1. Save basic information of the dish
         dish.setStatus(StatusConstant.DISABLE);
-        dishMapper.insert(dish);
+        this.save(dish);
 
         //2. Save dish flavor information
         List<DishFlavor> flavors = dishDTO.getFlavors();
-        if (!CollectionUtils.isEmpty(flavors)) {
-            flavors.forEach(dishFlavor -> {
-                dishFlavor.setDishId(dish.getId());
-            });
-            dishFlavorMapper.insertBatch(flavors);
-        }
+        flavors = flavors.stream().map((item) -> {
+            item.setDishId(dish.getId());
+            return item;
+        }).collect(Collectors.toList());
+        dishFlavorService.saveBatch(flavors);
 
         // 3. Delete the dish data in the redis cache
         cleanCache(dishDTO.getCategoryId().toString());
@@ -130,11 +134,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public void update(DishDTO dishDTO) {
         //1. Modify basic information of the dish
         Dish dish = BeanHelper.copyProperties(dishDTO, Dish.class);
-        dishMapper.update(dish);
+        dishMapper.updateById(dish);
 
         //2. Modify dish flavor information (delete first, then add)
         //2.1 Delete existing flavor data based on dish ID
-        dishFlavorMapper.deleteBatchIds(Collections.singletonList(dish.getId()));
+        dishFlavorMapper.delete(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dish.getId()));
 
         //2.2 Then add new flavor data
         List<DishFlavor> flavors = dishDTO.getFlavors();
@@ -142,7 +146,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             flavors.forEach(dishFlavor -> {
                 dishFlavor.setDishId(dish.getId());
             });
-            dishFlavorMapper.insertBatch(flavors);
+            dishFlavorService.saveBatch(flavors);
         }
 
         // 3、Delete the dish data in the redis cache
@@ -157,15 +161,16 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 .id(id)
                 .status(status)
                 .build();
-        dishMapper.update(dish);
+        dishMapper.updateById(dish);
 
         //2. If stopping sale, also stop sale of setmeals associated with the dish
-        if (status == StatusConstant.DISABLE) {
-            List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(Collections.singletonList(id));
-            if (!CollectionUtils.isEmpty(setmealIds)) {
-                setmealIds.forEach(setmealId -> {
-                    Setmeal setmeal = Setmeal.builder().id(setmealId).status(StatusConstant.DISABLE).build();
-                    setmealMapper.update(setmeal);//Stop sale of corresponding setmeal
+        if (status.equals(StatusConstant.DISABLE)) {
+            List<SetmealDish> setmealDishes = setmealDishMapper.selectList(new LambdaQueryWrapper<SetmealDish>()
+                    .in(SetmealDish::getDishId, id));
+
+            if (!CollectionUtils.isEmpty(setmealDishes)) {
+                setmealDishes.forEach((item) -> {
+                    setmealMapper.update(Setmeal.builder().id(item.getSetmealId()).status(StatusConstant.DISABLE).build());
                 });
             }
         }
@@ -175,8 +180,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     }
 
     @Override
-    public List<Dish> list(Long categoryId, String name) {
-        return dishMapper.selectDishByCondition(categoryId, name);
+    public List<Dish> list(Long categoryId) {
+        return dishMapper.selectList(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId));
     }
 
     @Override

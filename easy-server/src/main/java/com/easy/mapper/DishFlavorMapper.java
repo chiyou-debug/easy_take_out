@@ -11,11 +11,4 @@ import java.util.List;
 @Mapper
 public interface DishFlavorMapper extends BaseMapper<DishFlavor> {
 
-    /**
-     * Batch save dish flavor information
-     *
-     * @param flavors
-     */
-    void insertBatch(List<DishFlavor> flavors);
-
 }

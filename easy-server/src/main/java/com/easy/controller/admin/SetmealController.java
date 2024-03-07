@@ -97,8 +97,8 @@ public class SetmealController {
      * @param id
      * @return
      */
-    @PostMapping("/status/{status}")
-    public Result startOrStop(@PathVariable Integer status, Long id) {
+    @PutMapping("/status/{status}/{id}")
+    public Result startOrStop(@PathVariable Integer status, @PathVariable Long id) {
         log.info("Enabling/Disabling set meal for sale. ID: {}, Status: {}", id, status);
         setmealService.startOrStop(status, id);
         return Result.success();

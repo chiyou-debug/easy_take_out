@@ -15,12 +15,6 @@ import java.util.List;
 @Mapper
 public interface DishMapper extends BaseMapper<Dish> {
 
-    /**
-     * Dynamically update dish information
-     *
-     * @param dish
-     */
-    void update(Dish dish);
 
     /**
      * Query dishes by setmeal ID
@@ -30,15 +24,6 @@ public interface DishMapper extends BaseMapper<Dish> {
      */
     @Select("select d.* from dish d left join setmeal_dish sd on d.id = sd.dish_id where sd.setmeal_id = #{setmealId}")
     List<Dish> getBySetmealId(Long setmealId);
-
-    /**
-     * Query dishes by category ID and name
-     *
-     * @param categoryId
-     * @param name
-     * @return
-     */
-    List<Dish> selectDishByCondition(Long categoryId, String name);
 
     /**
      * Query dishes and their related data
