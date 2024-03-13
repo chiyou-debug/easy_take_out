@@ -21,15 +21,12 @@ public class CategoryController {
     private CategoryService categoryService;
 
     /**
-     * Query categories
-     *
-     * @param type
+     * C-end, query all categories
      * @return
      */
     @GetMapping("/list")
     @ApiOperation("Query categories")
-    public Result<List<Category>> list(Integer type) {
-        List<Category> list = categoryService.list(type);
-        return Result.success(list);
+    public Result<List<Category>> list() {
+        return Result.success(categoryService.list());
     }
 }

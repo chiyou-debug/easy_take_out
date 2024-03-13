@@ -1,6 +1,7 @@
 package com.easy.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.easy.constant.MessageConstant;
 import com.easy.context.BaseContext;
 import com.easy.dto.OrdersPaymentDTO;
@@ -54,7 +55,8 @@ public class OrdersServiceImpl implements OrdersService {
 
         // 0. Cannot place an order if the shopping cart data is empty.
         ShoppingCart shoppingCart = ShoppingCart.builder().userId(BaseContext.getCurrentId()).build();
-        List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectList(new LambdaQueryWrapper<ShoppingCart>()
+                .eq(ShoppingCart::getUserId, shoppingCart.getUserId()));
         if (CollectionUtils.isEmpty(shoppingCartList)) {
             throw new BusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
@@ -86,7 +88,8 @@ public class OrdersServiceImpl implements OrdersService {
         orderDetailMapper.insertBatch(orderDetailList);
 
         // 3. Clearing the current user's shopping cart data.
-        shoppingCartMapper.deleteByUserId(BaseContext.getCurrentId());
+        shoppingCartMapper.delete(new LambdaQueryWrapper<ShoppingCart>()
+                .in(ShoppingCart::getUserId, BaseContext.getCurrentId()));
 
         // 4. Assembling data and returning.
         OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()

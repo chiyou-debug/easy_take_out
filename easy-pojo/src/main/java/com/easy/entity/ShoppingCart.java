@@ -49,6 +49,6 @@ public class ShoppingCart implements Serializable {
     private String image;
 
     // Creation time
-    @TableField(fill = FieldFill.INSERT)
+//    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

@@ -1,5 +1,6 @@
 package com.easy.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.easy.context.BaseContext;
 import com.easy.dto.ShoppingCartDTO;
 import com.easy.entity.Dish;
@@ -34,13 +35,15 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCart shoppingCart = BeanHelper.copyProperties(shoppingCartDTO, ShoppingCart.class);
         shoppingCart.setUserId(BaseContext.getCurrentId());
 
-        List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectList(new LambdaQueryWrapper<ShoppingCart>()
+                .eq(shoppingCart.getDishId() != null, ShoppingCart::getDishId, shoppingCart.getDishId())
+                .eq(shoppingCart.getSetmealId() != null, ShoppingCart::getSetmealId, shoppingCart.getSetmealId()));
 
         //2. If the product already exists in the shopping cart, increase the quantity by 1.
         if (!CollectionUtils.isEmpty(shoppingCartList)) {
             ShoppingCart cart = shoppingCartList.get(0);
             cart.setNumber(cart.getNumber() + 1);
-            shoppingCartMapper.updateNumberById(cart);
+            shoppingCartMapper.updateById(cart);
         } else {
             //3. If the product does not exist in the shopping cart, add a new record.
             Long dishId = shoppingCart.getDishId();
@@ -67,7 +70,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public List<ShoppingCart> list() {
         ShoppingCart shoppingCart = ShoppingCart.builder().userId(BaseContext.getCurrentId()).build();
-        return shoppingCartMapper.list(shoppingCart);
+        return shoppingCartMapper.selectList(new LambdaQueryWrapper<ShoppingCart>()
+                .eq(ShoppingCart::getUserId, shoppingCart.getUserId()));
     }
 
     @Override
@@ -75,7 +79,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         //1. Retrieve the shopping cart list for the current user and the current dish/setmeal.
         ShoppingCart shoppingCart = BeanHelper.copyProperties(shoppingCartDTO, ShoppingCart.class);
         shoppingCart.setUserId(BaseContext.getCurrentId());
-        List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectList(new LambdaQueryWrapper<ShoppingCart>()
+                .eq(ShoppingCart::getUserId, shoppingCart.getUserId()));
 
         //2. If the quantity of the product in the shopping cart is greater than 1, decrease it by 1 and update the database.
         if (!CollectionUtils.isEmpty(shoppingCartList)) {
@@ -83,7 +88,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             Integer number = shoppingCart.getNumber();
             if (number > 1) {
                 shoppingCart.setNumber(shoppingCart.getNumber() - 1);
-                shoppingCartMapper.updateNumberById(shoppingCart);
+                shoppingCartMapper.updateById(shoppingCart);
             } else {
                 //3. If the quantity is 1, delete the product from the shopping cart.
                 shoppingCartMapper.deleteById(shoppingCart.getId());
@@ -93,6 +98,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public void cleanShoppingCart() {
-        shoppingCartMapper.deleteByUserId(BaseContext.getCurrentId());
+        shoppingCartMapper.delete(new LambdaQueryWrapper<ShoppingCart>()
+                .eq(ShoppingCart::getUserId, BaseContext.getCurrentId()));
     }
 }
