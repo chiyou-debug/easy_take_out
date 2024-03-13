@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.easy.dto.EmployeeDTO;
 import com.easy.dto.EmployeeLoginDTO;
 import com.easy.dto.EmployeePageQueryDTO;
+import com.easy.dto.PasswordEditDTO;
 import com.easy.entity.Employee;
 import com.easy.result.PageResult;
 
@@ -54,4 +55,11 @@ public interface EmployeeService extends IService<Employee> {
      * @param employeeDTO
      */
     void update(EmployeeDTO employeeDTO);
+
+    /**
+     * change old password to new password
+     *
+     * @param passwordEditDTO
+     */
+    void editPassword(PasswordEditDTO passwordEditDTO);
 }

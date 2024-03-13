@@ -12,6 +12,7 @@ import com.easy.context.BaseContext;
 import com.easy.dto.EmployeeDTO;
 import com.easy.dto.EmployeeLoginDTO;
 import com.easy.dto.EmployeePageQueryDTO;
+import com.easy.dto.PasswordEditDTO;
 import com.easy.entity.Employee;
 import com.easy.exception.BusinessException;
 import com.easy.exception.DataException;
@@ -114,8 +115,6 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     public void save(EmployeeDTO employeeDTO) {
         // 1. Complete entity attributes
         Employee employee = BeanHelper.copyProperties(employeeDTO, Employee.class);
-        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
-        employee.setStatus(StatusConstant.ENABLE);
 
         // 2. Call mapper to save employee data
         employeeMapper.insert(employee);
@@ -129,6 +128,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // 2. Perform query
         employeeMapper.selectPage(page, new LambdaQueryWrapper<Employee>()
                 .like(StringUtils.isNotBlank(pageQueryDTO.getName()), Employee::getName, pageQueryDTO.getName())
+                .orderByDesc(Employee::getUpdateTime)
         );
 
         // 3. Parse and package the result
@@ -154,5 +154,19 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // Entity attribute copying
         Employee employee = BeanHelper.copyProperties(employeeDTO, Employee.class);
         employeeMapper.updateById(employee);
+    }
+
+    @Override
+    public void editPassword(PasswordEditDTO passwordEditDTO) {
+        // 1. check the old password is matched
+        Employee emp = employeeMapper.selectOne(new LambdaQueryWrapper<Employee>()
+                .eq(Employee::getId, BaseContext.getCurrentId()));
+        if (!emp.getPassword().equals(DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes()))) {
+            throw new BusinessException("old password is not correct!");
+        }
+
+        // 2. change the old password to new password
+        emp.setPassword(DigestUtils.md5DigestAsHex(passwordEditDTO.getNewPassword().getBytes()));
+        employeeMapper.updateById(emp);
     }
 }

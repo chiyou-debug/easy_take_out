@@ -60,9 +60,9 @@ public class CategoryController {
      * @param id
      * @return
      */
-    @DeleteMapping()
+    @DeleteMapping("/{id}")
     @ApiOperation("Delete Category")
-    public Result<String> deleteById(Long id) {
+    public Result<String> deleteById(@PathVariable Long id) {
         log.info("Deleting category: {}", id);
         categoryService.deleteById(id);
         return Result.success();

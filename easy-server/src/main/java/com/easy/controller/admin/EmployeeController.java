@@ -4,6 +4,7 @@ import com.easy.constant.JwtClaimsConstant;
 import com.easy.dto.EmployeeDTO;
 import com.easy.dto.EmployeeLoginDTO;
 import com.easy.dto.EmployeePageQueryDTO;
+import com.easy.dto.PasswordEditDTO;
 import com.easy.entity.Employee;
 import com.easy.properties.JwtProperties;
 import com.easy.result.PageResult;
@@ -71,6 +72,20 @@ public class EmployeeController {
     }
 
     /**
+     * Edit password: change the employees' old password to new password
+     *
+     * @param passwordEditDTO
+     * @return
+     */
+    @ApiOperation("Edit password")
+    @PutMapping("editPassword")
+    public Result<String> editPassword(@RequestBody PasswordEditDTO passwordEditDTO) {
+        log.info("Edit new password with {}", passwordEditDTO.getNewPassword());
+        employeeService.editPassword(passwordEditDTO);
+        return Result.success("password edit success!");
+    }
+
+    /**
      * Add Employee: Administrators can add employee information for the store in the backend management system.
      */
     @ApiOperation("Add Employee")
@@ -99,8 +114,8 @@ public class EmployeeController {
      * Enable/Disable Employee: Accounts can be enabled/disabled in the backend system. Once an account is disabled, it can no longer log in to the system.
      */
     @ApiOperation("Enable/Disable Employee Account")
-    @PostMapping("/status/{status}")
-    public Result enableOrDisable(@PathVariable Integer status, Long id) {
+    @PutMapping("/status/{status}/{id}")
+    public Result enableOrDisable(@PathVariable Integer status, @PathVariable Long id) {
         log.info("Enable/Disable employee, {}, {}", status, id);
         employeeService.enableOrDisable(status, id);
         return Result.success();

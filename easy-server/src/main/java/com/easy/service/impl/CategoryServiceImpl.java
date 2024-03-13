@@ -45,9 +45,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         // Copy properties
         Category category = BeanHelper.copyProperties(categoryDTO, Category.class);
 
-        // Default category status is set to disabled (0)
-        category.setStatus(StatusConstant.DISABLE);
-
         categoryMapper.insert(category);
     }
 
@@ -99,14 +96,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     }
 
     @Override
-    public Category getById(Long id) {
-        // Query category information by its ID
-        return categoryMapper.selectById(id);
-    }
-
-    @Override
     public List<Category> list(Integer type) {
         // Query categories by their type
-        return categoryMapper.selectList(new LambdaQueryWrapper<Category>().eq(Category::getType, type));
+        return categoryMapper.selectList(new LambdaQueryWrapper<Category>()
+                .eq(Category::getType, type)
+                .orderByAsc(Category::getUpdateTime)
+        );
     }
 }

@@ -50,7 +50,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 shoppingCart.setImage(dish.getImage());
                 shoppingCart.setName(dish.getName());
             } else { // For setmeals
-                Setmeal setmeal = setmealMapper.getById(shoppingCart.getSetmealId());
+                Setmeal setmeal = setmealMapper.selectById(shoppingCart.getSetmealId());
                 shoppingCart.setAmount(setmeal.getPrice());
                 shoppingCart.setImage(setmeal.getImage());
                 shoppingCart.setName(setmeal.getName());

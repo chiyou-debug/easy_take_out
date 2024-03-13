@@ -30,7 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // Add interceptor for admin paths, excluding the login path
-        registry.addInterceptor(adminLoginTokenInterceptor).addPathPatterns("/admin/**").excludePathPatterns("/admin/employee/login");
+        registry.addInterceptor(adminLoginTokenInterceptor).addPathPatterns("/admin/**").excludePathPatterns(List.of("/admin/employee/login", "/admin/employee/logout"));
         // Add interceptor for user paths, excluding the login path and status path
         registry.addInterceptor(userLoginTokenInterceptor).addPathPatterns("/user/**").excludePathPatterns("/user/user/login", "/user/shop/status");
     }

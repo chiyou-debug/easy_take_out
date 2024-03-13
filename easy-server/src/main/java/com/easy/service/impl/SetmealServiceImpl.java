@@ -2,7 +2,6 @@ package com.easy.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.easy.constant.MessageConstant;
 import com.easy.constant.StatusConstant;
@@ -16,10 +15,13 @@ import com.easy.mapper.DishMapper;
 import com.easy.mapper.SetmealDishMapper;
 import com.easy.mapper.SetmealMapper;
 import com.easy.result.PageResult;
+import com.easy.service.SetmealDishService;
 import com.easy.service.SetmealService;
 import com.easy.utils.BeanHelper;
 import com.easy.vo.DishItemVO;
 import com.easy.vo.SetmealVO;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -40,13 +42,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     private SetmealDishMapper setmealDishMapper;
     @Autowired
     private DishMapper dishMapper;
+    @Autowired
+    private SetmealDishService setmealDishService;
 
     @CacheEvict(cacheNames = "setmeal:cache", key = "#setmealDTO.categoryId")
     @Override
     public void save(SetmealDTO setmealDTO) {
         //1. Save basic information of the setmeal
         Setmeal setmeal = BeanHelper.copyProperties(setmealDTO, Setmeal.class);
-        setmeal.setStatus(StatusConstant.DISABLE);
         setmealMapper.insert(setmeal);
 
         //2. Get the primary key ID of the setmeal
@@ -59,23 +62,20 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         }
 
         //3. Save the relationship between setmeal and dishes
-        setmealDishMapper.insertBatch(setmealDishes);
+        setmealDishService.saveBatch(setmealDishes);
     }
 
 
     @Override
     public PageResult page(SetmealPageQueryDTO setmealPageQueryDTO) {
         //1. Set pagination parameters
-        IPage page = new Page(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
+        PageHelper.startPage(setmealPageQueryDTO.getPage(), setmealPageQueryDTO.getPageSize());
 
         //2. Execute the query
-        setmealMapper.selectPage(page, new LambdaQueryWrapper<Setmeal>()
-                .like(StringUtils.isNotBlank(setmealPageQueryDTO.getName()), Setmeal::getName, setmealPageQueryDTO.getName())
-                .eq(setmealPageQueryDTO.getCategoryId() != null, Setmeal::getCategoryId, setmealPageQueryDTO.getCategoryId())
-                .eq(setmealPageQueryDTO.getStatus() != null, Setmeal::getStatus, setmealPageQueryDTO.getStatus()));
+        Page<SetmealVO> page = setmealMapper.pageQuery(setmealPageQueryDTO);
 
         //3. Parse and encapsulate the results
-        return new PageResult(page.getTotal(), page.getRecords());
+        return new PageResult(page.getTotal(), page.getResult());
     }
 
 
@@ -85,24 +85,25 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     public void delete(List<Long> ids) {
         //1. Setmeals on sale cannot be deleted
         ids.forEach(id -> {
-            Setmeal setmeal = setmealMapper.getById(id);
-            if (StatusConstant.ENABLE == setmeal.getStatus()) {
+            Setmeal setmeal = setmealMapper.selectById(id);
+            if (StatusConstant.ENABLE.equals(setmeal.getStatus())) {
                 throw new BusinessException(MessageConstant.SETMEAL_ON_SALE);
             }
         });
 
         //2. Delete setmeal data and its association with dishes
-        setmealMapper.deleteBatchByIds(ids);
-        setmealDishMapper.deleteBatchBySetmealIds(ids);
+        setmealMapper.deleteBatchIds(ids);
+        setmealDishMapper.deleteBatchIds(ids);
     }
 
     @Override
     public SetmealVO getById(Long id) {
         //1. Query basic information of the setmeal by ID
-        Setmeal setmeal = setmealMapper.getById(id);
+        Setmeal setmeal = setmealMapper.selectById(id);
 
         //2. Query the list of dishes associated with the setmeal by setmeal ID
-        List<SetmealDish> setmealDishList = setmealDishMapper.getBySetmealId(id);
+        List<SetmealDish> setmealDishList = setmealDishMapper.selectList(
+                new LambdaQueryWrapper<SetmealDish>().eq(id != null, SetmealDish::getSetmealId, id));
 
         //3. Encapsulate the result
         SetmealVO setmealVO = BeanHelper.copyProperties(setmeal, SetmealVO.class);
@@ -118,12 +119,12 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     public void update(SetmealDTO setmealDTO) {
         //1. Modify basic information of the setmeal
         Setmeal setmeal = BeanHelper.copyProperties(setmealDTO, Setmeal.class);
-        setmealMapper.update(setmeal);
+        setmealMapper.updateById(setmeal);
 
-        Long setmealId = setmealDTO.getId();
 
         //2. First delete the relationship between setmeal and dishes
-        setmealDishMapper.deleteBatchBySetmealIds(Collections.singletonList(setmealId));
+        Long setmealId = setmealDTO.getId();
+        setmealDishMapper.delete(new LambdaQueryWrapper<SetmealDish>().in(setmealId != null, SetmealDish::getSetmealId, setmealId));
 
         //3. Then insert the relationship between setmeal and dishes
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
@@ -131,7 +132,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
             setmealDishes.forEach(setmealDish -> {
                 setmealDish.setSetmealId(setmealId);
             });
-            setmealDishMapper.insertBatch(setmealDishes);
+            setmealDishService.saveBatch(setmealDishes);
         }
     }
 
@@ -140,11 +141,11 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     @Override
     public void startOrStop(Integer status, Long id) {
         //1. If starting, ensure all associated dishes are also on sale
-        if (status == StatusConstant.ENABLE) {
+        if (status.equals(StatusConstant.ENABLE)) {
             List<Dish> dishList = dishMapper.getBySetmealId(id);
             if (!CollectionUtils.isEmpty(dishList)) {
                 dishList.forEach(dish -> {
-                    if (StatusConstant.DISABLE == dish.getStatus()) {
+                    if (StatusConstant.DISABLE.equals(dish.getStatus())) {
                         throw new BusinessException(MessageConstant.SETMEAL_ENABLE_FAILED);
                     }
                 });
@@ -156,14 +157,14 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
                 .id(id)
                 .status(status)
                 .build();
-        setmealMapper.update(setmeal);
+        setmealMapper.updateById(setmeal);
     }
 
 
     @Cacheable(cacheNames = "setmeal:cache", key = "#setmeal.categoryId")
     @Override
     public List<Setmeal> list(Setmeal setmeal) {
-        return setmealMapper.list(setmeal);
+        return setmealMapper.selectList(new LambdaQueryWrapper<Setmeal>().eq(setmeal.getId() != null, Setmeal::getId, setmeal.getId()));
     }
 
     @Override

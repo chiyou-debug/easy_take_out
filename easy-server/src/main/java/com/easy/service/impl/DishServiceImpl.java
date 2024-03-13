@@ -23,14 +23,12 @@ import com.easy.vo.DishVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,11 +52,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Transactional
     @Override
     public void saveWithFlavors(DishDTO dishDTO) {
+        dishDTO.setStatus(StatusConstant.ENABLE);
         Dish dish = BeanHelper.copyProperties(dishDTO, Dish.class);
 
         //1. Save basic information of the dish
-        dish.setStatus(StatusConstant.DISABLE);
-        this.save(dish);
+        dishMapper.insert(dish);
 
         //2. Save dish flavor information
         List<DishFlavor> flavors = dishDTO.getFlavors();
@@ -157,10 +155,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Override
     public void startOrStop(Long id, Integer status) {
         //1. Update dish status
-        Dish dish = Dish.builder()
-                .id(id)
-                .status(status)
-                .build();
+        Dish dish = Dish.builder().id(id).status(status).build();
         dishMapper.updateById(dish);
 
         //2. If stopping sale, also stop sale of setmeals associated with the dish
@@ -170,7 +165,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
             if (!CollectionUtils.isEmpty(setmealDishes)) {
                 setmealDishes.forEach((item) -> {
-                    setmealMapper.update(Setmeal.builder().id(item.getSetmealId()).status(StatusConstant.DISABLE).build());
+                    setmealMapper.updateById(Setmeal.builder().id(item.getSetmealId()).status(StatusConstant.DISABLE).build());
                 });
             }
         }

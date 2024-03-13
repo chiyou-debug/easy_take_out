@@ -54,12 +54,4 @@ public interface CategoryService extends IService<Category> {
      * @return
      */
     List<Category> list(Integer type);
-
-    /**
-     * Query category information by ID
-     *
-     * @param id
-     * @return
-     */
-    Category getById(Long id);
 }
