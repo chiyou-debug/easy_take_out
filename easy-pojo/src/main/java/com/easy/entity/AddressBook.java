@@ -27,42 +27,29 @@ public class AddressBook implements Serializable {
     private Long userId;
 
     // Recipient
-    private String consignee;
+    private String name;
 
     // Phone number
     private String phone;
 
-    // Gender: 0 for male, 1 for female
-    private Integer sex;
+    // Address
+    private String address;
 
-    // Province code
-    private String provinceCode;
+    // City or Town
+    private String city;
 
-    // Province name
-    private String provinceName;
-
-    // City code
-    private String cityCode;
-
-    // City name
-    private String cityName;
-
-    // District code
-    private String districtCode;
-
-    // District name
-    private String districtName;
-
-    // Detailed address
-    private String detail;
-
-    // Label
-    private String label;
+    // Eir code
+    private String eircode;
 
     // Default: 0 for no, 1 for yes
     private Integer isDefault;
 
+    // Address Label
+    private String addressLabel;
+
     // Creation time
-    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    // Update time
+    private LocalDateTime updateTime;
 }

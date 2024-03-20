@@ -1,9 +1,11 @@
 package com.easy.service;
 
-import com.easy.dto.OrdersPaymentDTO;
-import com.easy.dto.OrdersSubmitDTO;
+import com.easy.dto.*;
+import com.easy.result.PageResult;
 import com.easy.vo.OrderPaymentVO;
+import com.easy.vo.OrderStatisticsVO;
 import com.easy.vo.OrderSubmitVO;
+import com.easy.vo.OrderVO;
 
 public interface OrdersService {
     /**
@@ -29,5 +31,81 @@ public interface OrdersService {
      * @param outTradeNo
      */
     void paySuccess(String outTradeNo);
+
+    /**
+     * page query for the history orders
+     *
+     * @param page
+     * @param pageSize
+     * @param status
+     * @return
+     */
+    PageResult pageQueryHistoryOrders(Integer page, Integer pageSize, Integer status);
+
+    /**
+     * query order details
+     *
+     * @param id
+     * @return
+     */
+    OrderVO details(Long id);
+
+
+    /**
+     * cancel order by id
+     *
+     * @param id
+     */
+    void cancelOrder(Long id) throws Exception;
+
+    /**
+     * conditional search
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * Statistics of order quantities by status
+     *
+     * @return
+     */
+    OrderStatisticsVO statistics();
+
+    /**
+     * Accept order
+     *
+     * @param ordersConfirmDTO
+     */
+    void confirm(OrdersConfirmDTO ordersConfirmDTO);
+
+    /**
+     * Reject order
+     *
+     * @param ordersRejectionDTO
+     */
+    void rejection(OrdersRejectionDTO ordersRejectionDTO) throws Exception;
+
+    /**
+     * Cancel order (admin system)
+     *
+     * @param ordersCancelDTO
+     */
+    void cancelByAdmin(OrdersCancelDTO ordersCancelDTO) throws Exception;
+
+    /**
+     * Deliver order
+     *
+     * @param id
+     */
+    void delivery(Long id);
+
+    /**
+     * Complete order
+     *
+     * @param id
+     */
+    void complete(Long id);
 
 }

@@ -61,10 +61,10 @@ easy:
     appid: ${easy.wechat.appid}
     secret: ${easy.wechat.secret}
     #wechat Pay merchant information
-    mchid: ${sky.wechat.mchid}
-    mchSerialNo: ${sky.wechat.mchSerialNo}
-    privateKeyFilePath: ${sky.wechat.privateKeyFilePath}
-    apiV3Key: ${sky.wechat.apiV3Key}
-    weChatPayCertFilePath: ${sky.wechat.weChatPayCertFilePath}
-    notifyUrl: ${sky.wechat.notifyUrl}
-    refundNotifyUrl: ${sky.wechat.refundNotifyUrl}
+    mchid: ${easy.wechat.mchid}
+    mchSerialNo: ${easy.wechat.mchSerialNo}
+    privateKeyFilePath: ${easy.wechat.privateKeyFilePath}
+    apiV3Key: ${easy.wechat.apiV3Key}
+    weChatPayCertFilePath: ${easy.wechat.weChatPayCertFilePath}
+    notifyUrl: ${easy.wechat.notifyUrl}
+    refundNotifyUrl: ${easy.wechat.refundNotifyUrl}
