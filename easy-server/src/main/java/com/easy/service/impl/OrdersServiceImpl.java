@@ -54,6 +54,8 @@ public class OrdersServiceImpl implements OrdersService {
     @Autowired
     private WebSocketServer webSocketServer;
 
+    public static Long orderId;
+
     @Transactional
     @Override
     public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO) {
@@ -126,7 +128,7 @@ public class OrdersServiceImpl implements OrdersService {
         User user = userMapper.getById(userId);
 
         // Call the WeChat payment API to generate a prepayment transaction order
-        JSONObject jsonObject = weChatPayUtil.pay(
+        /*JSONObject jsonObject = weChatPayUtil.pay(
                 ordersPaymentDTO.getOrderNumber(), // Merchant order number
                 new BigDecimal(0.01), // Payment amount in yuan
                 "EasyTakeout Order", // Product description
@@ -135,23 +137,32 @@ public class OrdersServiceImpl implements OrdersService {
 
         if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
             throw new BusinessException("This order has been paid");
-        }
+        }*/
 
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", "ORDERPAID");
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
         vo.setPackageStr(jsonObject.getString("package"));
+
+        Orders order = Orders.builder()
+                .status(Orders.ORDER_STATUS_PENDING_ACCEPTANCE)
+                .payStatus(Orders.PAYMENT_STATUS_PAID)
+                .checkoutTime(LocalDateTime.now())
+                .id(orderId).build();
+        ordersMapper.updateById(order);
 
         /**
          * Push a message to the management terminal - remind of new orders -
          *   --- {"type": 1, "orderId": 12, "content": "Ordernumber: 273872873823"}
          */
-        Orders order = ordersMapper.selectOne(new LambdaQueryWrapper<Orders>()
-                .eq(Orders::getNumber, ordersPaymentDTO.getOrderNumber()));
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("type", 0);
-        paramMap.put("orderId", order.getId());
-        paramMap.put("content", "OrderNumber: " + order.getNumber());
-        log.info("Push a message to the management terminal , {}", paramMap);
-        webSocketServer.sendMessageToBackendSystem(JSONObject.toJSONString(paramMap));
+//        order = ordersMapper.selectOne(new LambdaQueryWrapper<Orders>()
+//                .eq(Orders::getNumber, ordersPaymentDTO.getOrderNumber()));
+//        Map<String, Object> paramMap = new HashMap<>();
+//        paramMap.put("type", 0);
+//        paramMap.put("orderId", order.getId());
+//        paramMap.put("content", "OrderNumber: " + order.getNumber());
+//        log.info("Push a message to the management terminal , {}", paramMap);
+//        webSocketServer.sendMessageToBackendSystem(JSONObject.toJSONString(paramMap));
 
         return vo;
     }

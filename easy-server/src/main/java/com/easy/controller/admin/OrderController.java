@@ -8,6 +8,7 @@ import com.easy.result.PageResult;
 import com.easy.result.Result;
 import com.easy.service.OrdersService;
 import com.easy.vo.OrderStatisticsVO;
+import com.easy.vo.OrderVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -120,5 +121,18 @@ public class OrderController {
         log.info("Completing order: {}", id);
         orderService.complete(id);
         return Result.success();
+    }
+
+    /**
+     * query oder details on backend side
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/details/{id}")
+    @ApiOperation("query order details")
+    public Result<OrderVO> details(@PathVariable("id") Long id) {
+        OrderVO orderVO = orderService.details(id);
+        return Result.success(orderVO);
     }
 }
