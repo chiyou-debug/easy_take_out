@@ -15,9 +15,9 @@ import java.util.List;
 public class SalesTop10ReportVO implements Serializable {
 
     // List of product names, e.g., Sweet and Sour Pork, Kung Pao Chicken, Boiled Fish
-    private List nameList;
+    private String nameList;
 
     // List of sales quantities, e.g., 260, 215, 200
-    private List numberList;
+    private String numberList;
 
 }

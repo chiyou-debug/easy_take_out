@@ -3,11 +3,8 @@ package com.easy.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.easy.dto.DishPageQueryDTO;
 import com.easy.entity.Dish;
-import com.easy.enumeration.OperationType;
 import com.easy.vo.DishVO;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;

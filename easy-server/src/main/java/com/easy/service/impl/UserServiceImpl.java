@@ -2,6 +2,7 @@ package com.easy.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.easy.constant.MessageConstant;
 import com.easy.dto.UserLoginDTO;
 import com.easy.entity.User;
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
         }
 
         //2. If the user is accessing the mini program for the first time, complete the auto-registration (insert) functionality
-        User user = userMapper.selectByOpenid(openid);
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getOpenid, openid));
         if (user == null) {
             user = User.builder().openid(openid).createTime(LocalDateTime.now()).build();
             userMapper.insert(user);

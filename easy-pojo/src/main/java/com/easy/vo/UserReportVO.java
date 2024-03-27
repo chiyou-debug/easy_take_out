@@ -15,12 +15,12 @@ import java.util.List;
 public class UserReportVO implements Serializable {
 
     // List of dates, e.g., 2022-10-01, 2022-10-02, 2022-10-03
-    private List dateList;
+    private String dateList; // private List dateList;
 
     // Total number of users, e.g., 200, 210, 220
-    private List totalUserList;
+    private String totalUserList; // private List totalUserList;
 
     // New users, e.g., 20, 21, 10
-    private List newUserList;
+    private String newUserList; // private List newUserList;
 
 }

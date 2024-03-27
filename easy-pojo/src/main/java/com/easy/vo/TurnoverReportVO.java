@@ -15,9 +15,8 @@ import java.util.List;
 public class TurnoverReportVO implements Serializable {
 
     // List of dates, e.g., 2022-10-01, 2022-10-02, 2022-10-03
-    private List dateList;
+    private String dateList; //private List dateList;
 
     // List of turnovers, e.g., 406.0, 1520.0, 75.0
-    private List turnoverList;
-
+    private String turnoverList; //private List turnoverList;
 }

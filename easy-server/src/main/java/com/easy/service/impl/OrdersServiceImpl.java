@@ -125,7 +125,7 @@ public class OrdersServiceImpl implements OrdersService {
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // Get the ID of the current logged-in user
         Long userId = BaseContext.getCurrentId();
-        User user = userMapper.getById(userId);
+        User user = userMapper.selectById(userId);
 
         // Call the WeChat payment API to generate a prepayment transaction order
         /*JSONObject jsonObject = weChatPayUtil.pay(
