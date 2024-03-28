@@ -90,5 +90,17 @@ public class OrdersController {
         return Result.success();
     }
 
+    /**
+     * add one more
+     * @param id
+     * @return
+     */
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("add one more")
+    public Result repetition(@PathVariable Long id){
+        log.info("add one more , order ID: {}" , id);
+        ordersService.repetition(id);
+        return Result.success();
+    }
 
 }

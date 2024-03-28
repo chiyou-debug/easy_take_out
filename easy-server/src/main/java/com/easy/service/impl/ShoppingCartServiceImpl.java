@@ -1,6 +1,7 @@
 package com.easy.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.easy.context.BaseContext;
 import com.easy.dto.ShoppingCartDTO;
 import com.easy.entity.Dish;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class ShoppingCartServiceImpl implements ShoppingCartService {
+public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, ShoppingCart> implements ShoppingCartService {
 
     @Autowired
     private ShoppingCartMapper shoppingCartMapper;

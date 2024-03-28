@@ -1,11 +1,12 @@
 package com.easy.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.easy.dto.ShoppingCartDTO;
 import com.easy.entity.ShoppingCart;
 
 import java.util.List;
 
-public interface ShoppingCartService {
+public interface ShoppingCartService extends IService<ShoppingCart> {
     /**
      * Add to shopping cart
      */

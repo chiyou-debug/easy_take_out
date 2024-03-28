@@ -12,6 +12,7 @@ import com.easy.exception.BusinessException;
 import com.easy.mapper.*;
 import com.easy.result.PageResult;
 import com.easy.service.OrdersService;
+import com.easy.service.ShoppingCartService;
 import com.easy.utils.BeanHelper;
 import com.easy.utils.WeChatPayUtil;
 import com.easy.vo.OrderPaymentVO;
@@ -53,6 +54,8 @@ public class OrdersServiceImpl implements OrdersService {
     private WeChatPayUtil weChatPayUtil;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private ShoppingCartService shoppingCartService;
 
     public static Long orderId;
 
@@ -425,6 +428,25 @@ public class OrdersServiceImpl implements OrdersService {
         ordersMapper.updateById(o);
     }
 
+    @Override
+    public void repetition(Long id) {
+        //1. Query order detail data based on the order ID
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectList(new LambdaQueryWrapper<OrderDetail>()
+                .eq(OrderDetail::getOrderId, id));
+
+        //2. Encapsulate shopping cart list data
+        if(orderDetailList != null){
+            List<ShoppingCart> shoppingCartList = orderDetailList.stream().map(orderDetail -> {
+                ShoppingCart shoppingCart = BeanHelper.copyProperties(orderDetail, ShoppingCart.class, "id");
+                shoppingCart.setCreateTime(LocalDateTime.now());
+                shoppingCart.setUserId(BaseContext.getCurrentId());
+                return shoppingCart;
+            }).collect(Collectors.toList());
+
+            //3. Add shopping cart data for the current logged-in user
+            shoppingCartService.saveBatch(shoppingCartList);
+        }
+    }
 
     private List<OrderVO> getOrderVOList(IPage<Orders> page) {
         // Returning order dish information, customizing OrderVO for response

@@ -40,6 +40,6 @@ public class User implements Serializable {
     private String avatar;
 
     // Creation time
-    @TableField(fill = FieldFill.INSERT)
+//    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

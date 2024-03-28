@@ -108,4 +108,9 @@ public interface OrdersService {
      */
     void complete(Long id);
 
+    /**
+     * add one more
+     * @param id
+     */
+    void repetition(Long id);
 }
